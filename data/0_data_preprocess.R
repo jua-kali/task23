@@ -3,8 +3,8 @@
 
 #### CLEAN DATA ####
 
-df.old <- read.csv('data/existingproductattributes2017.csv')
-df.new <- read.csv('data/newproductattributes2017.csv')
+df.old <- read.csv('../data/existingproductattributes2017.csv')
+df.new <- read.csv('../data/newproductattributes2017.csv')
 
 # All ints/factors seem okay 
 # str(df.old)
@@ -45,11 +45,13 @@ df.old$BestSellersRank <- NULL
 df.new$BestSellersRank <- NULL
 
 # Write out csvs with clean data
-write.csv(df.old, file = 'data/0existing_products_cleaned.csv' )
-write.csv(df.new, file = 'data/0new_products_cleaned.csv' )
+write.csv(df.old, file = '../data/0existing_products_cleaned.csv' )
+write.csv(df.new, file = '../data/0new_products_cleaned.csv' )
 
 #### CORRELATION PLOT ####
 corrData <-cor(df.old)
+
+str(df.old)
 
 library(corrplot)
 corrplot(corrData, tl.pos = 'n', 
