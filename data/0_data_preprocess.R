@@ -45,8 +45,8 @@ df.old$BestSellersRank <- NULL
 df.new$BestSellersRank <- NULL
 
 # Write out csvs with clean data
-write.csv(df.old, file = 'existing_products_cleaned.csv' )
-write.csv(df.new, file = 'new_products_cleaned.csv' )
+write.csv(df.old, file = '0existing_products_cleaned.csv' )
+write.csv(df.new, file = '0new_products_cleaned.csv' )
 
 #### CORRELATION PLOT ####
 corrData <-cor(df.old)
