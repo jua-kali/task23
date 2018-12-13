@@ -1,5 +1,4 @@
-library(caret)
-set.seed(42)
+# This file is for cleaning and standardizing the data
 
 
 #### CLEAN DATA ####
