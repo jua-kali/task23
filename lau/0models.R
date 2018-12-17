@@ -6,14 +6,15 @@
 ##################################################
 
 library(caret)
-set.seed(42)
+library(plotly)
+set.seed(337)
 
 #### SET THESE PARAMETERS ####
 
 #Set models to try
-models <- c('lm', 'svmRadial', 'svmLinear') #svmLinear
+models <- c('lm', 'svmRadial', 'rf', 'gbm', 'xgbTree') #svmLinear
 #Set size of training set
-train.size <- 0.8
+train.size <- 1
 
 #### DATA ASSUMPTIONS ####
 
@@ -54,12 +55,12 @@ for (model_name in models) {
               preProcess = c('center', 'scale'),
               trControl = fitControl)
   
-  # Add this model to the list of models
+  # Add this model to the list of finished models
   allModels[[model_name]] <- model  
 
   foo <- model$results[c('RMSE', 'Rsquared', 'MAE')]
   foo$model <- model_name
-  foo$set <- 'train'
+  foo$set <- '1-train'
   
   trainTest <- rbind(trainTest, foo)
   
@@ -70,15 +71,46 @@ for (model_name in models) {
   bar <- postResample(testing$predVol, testing$Volume)
   bar <- data.frame(as.list(bar))
   bar$model <- model_name
-  bar$set <- 'test'
+  bar$set <- '2-test'
   trainTest <- rbind(trainTest, bar)
 
 }
 
-trainTest
-trainTest$plotName <- paste(trainTest$model, trainTest$set)
+results <- resamples(list(lm=allModels$lm, 
+                          #svmLinear = allModels$svmLinear,
+                          svmRadial = allModels$svmRadial,
+                          gbm = allModels$gbm,
+                          rf = allModels$rf))
+                          # gbt =allModels$xgbTree))
+
+bwplot(results,
+       scales = list(relation = 'free'),
+       xlim = list(c(0, 600), c(0, 700), c(0,1)),
+       layout = c(1,3)
+)
 
 
+summary(results)
+#### PLOT ERRORS ####
+prmse <- trainTest %>%
+  plot_ly() %>%
+  add_trace(x = ~model, y = ~RMSE, type = 'bar',
+            color = ~set)
+
+pmae <- trainTest %>%
+  plot_ly() %>%
+  add_trace(x = ~model, y = ~MAE, type = 'bar',
+            color = ~set)
+
+prsq <- trainTest %>%
+  plot_ly() %>%
+  add_trace(x = ~model, y = ~Rsquared, type = 'bar',
+            color = ~set)
 
 
+p <- subplot(prmse, pmae, prsq, 
+             nrows = 3,
+             titleY = TRUE)
+
+p
 # e1071, RandomForest, Gbm
