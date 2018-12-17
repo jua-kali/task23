@@ -101,8 +101,8 @@ err.summary
 allModels$knn
 # 'svmRadial', 'rf', 'gbm', 'xgbTree', 'knn'
 
-saveRDS(allModels, 'models/100train.mds') 
-allModels <- readRDS('models/100train.mds')
+saveRDS(allModels, 'models/80train.mds') 
+allModels80 <- readRDS('models/80train.mds')
 
 # Resamples takes 20 random samples to show you the range of error
 # It kind of makes sense to do this on the whole data set
@@ -119,27 +119,56 @@ bwplot(results,
 )
 
 
-summary(results)
-#### PLOT ERRORS ####
-prmse <- trainTest %>%
-  plot_ly() %>%
-  add_trace(x = ~model, y = ~RMSE, type = 'bar',
-            color = ~set)
+#### BUILD RESIDUAL PLOTS ####
+## I'm choosing to do this on the whole data set
+dfsimp <- subset(df.old, 
+                     select  = c('ProductNum', 
+                               'ProductType',      
+                               'Price', 
+                               'x4StarReviews', 
+                               'PositiveServiceReview',
+                               'ProfitMargin',
+                               'Volume'
+                               ))
 
-pmae <- trainTest %>%
-  plot_ly() %>%
-  add_trace(x = ~model, y = ~MAE, type = 'bar',
-            color = ~set)
+dfPred <- data.frame()
 
-prsq <- trainTest %>%
-  plot_ly() %>%
-  add_trace(x = ~model, y = ~Rsquared, type = 'bar',
-            color = ~set)
+# Start counter for model names...there's probably a more elegant way to do this
+i <- 1
+
+for (model in allModels80) {
+  dftemp <- dfsimp
+  dftemp$model <- names(allModels80)[i]
+  dftemp$VolPred <- predict(model, dftemp)
+  
+  dfPred <- rbind(dfPred, dftemp)
+  i <- i + 1
+}
 
 
-p <- subplot(prmse, pmae, prsq, 
-             nrows = 3,
-             titleY = TRUE)
+dfResidual$VolPred <- predict(dfResidual)
 
-p
+#### PLOT TEST/TRAIN ERRORS ####
+## works but need to activate in loop above
+# prmse <- trainTest %>%
+#   plot_ly() %>%
+#   add_trace(x = ~model, y = ~RMSE, type = 'bar',
+#             color = ~set)
+# 
+# pmae <- trainTest %>%
+#   plot_ly() %>%
+#   add_trace(x = ~model, y = ~MAE, type = 'bar',
+#             color = ~set)
+# 
+# prsq <- trainTest %>%
+#   plot_ly() %>%
+#   add_trace(x = ~model, y = ~Rsquared, type = 'bar',
+#             color = ~set)
+# 
+# 
+# p <- subplot(prmse, pmae, prsq, 
+#              nrows = 3,
+#              titleY = TRUE)
+# 
+# p
 # e1071, RandomForest, Gbm
