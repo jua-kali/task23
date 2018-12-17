@@ -145,8 +145,13 @@ for (model in allModels80) {
   i <- i + 1
 }
 
+dfPred$residual <- dfPred$Volume - dfPred$VolPred
 
-dfResidual$VolPred <- predict(dfResidual)
+p <- plot_ly(data = dfPred,
+             x = ~Volume,
+             y = ~residual,
+             color = ~model)
+p
 
 #### PLOT TEST/TRAIN ERRORS ####
 ## works but need to activate in loop above
