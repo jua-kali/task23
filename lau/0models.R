@@ -7,14 +7,14 @@
 
 library(caret)
 library(plotly)
-set.seed(337)
+set.seed(46)
 
 #### SET THESE PARAMETERS ####
 
 #Set models to try
-models <- c('lm', 'svmRadial', 'rf', 'gbm', 'xgbTree') #svmLinear
+models <- c('svmRadial', 'rf', 'gbm', 'xgbTree', 'knn') #svmLinear
 #Set size of training set
-train.size <- 1
+train.size <- .8
 
 #### DATA ASSUMPTIONS ####
 
@@ -35,6 +35,8 @@ trainTest <- data.frame(model = character (),
                         RSquared = double(),
                         MAE = double())
 
+err.summary <- data.frame()
+
 # Initialize model list
 allModels <- list()
 
@@ -43,8 +45,24 @@ inTraining <- createDataPartition(dfsub$Volume, p= train.size, list = FALSE)
 training <- dfsub[inTraining, ]
 testing <- dfsub[-inTraining, ]
 
+
+pa <- plot_ly(alpha = 0.6) %>%
+  add_histogram(x = training$Volume, 
+                name = 'Training',
+                nbinsx = 15,
+                histnorm = 'percent') %>%
+  add_histogram(x = testing$Volume, 
+                name = 'Testing', 
+                nbinsx = 15,
+                histnorm = 'percent') %>%
+  layout(title = 'Histogram of Volume',
+         barmode = 'overlay',
+         xaxis = list(title = 'Volume'),
+         yaxis = list(title = 'Percent of Total Count'))
+pa
+
 # Cross fold validation
-fitControl <- trainControl(method = 'repeatedCV', number = 10, repeats = 2)
+fitControl <- trainControl(method = 'repeatedcv', number = 10, repeats = 2)
 
 #### LOOP THROUGH MODELS ####
 
@@ -57,31 +75,42 @@ for (model_name in models) {
   
   # Add this model to the list of finished models
   allModels[[model_name]] <- model  
+  
+  err.summary <- rbind(err.summary, getTrainPerf(model))
 
-  foo <- model$results[c('RMSE', 'Rsquared', 'MAE')]
-  foo$model <- model_name
-  foo$set <- '1-train'
-  
-  trainTest <- rbind(trainTest, foo)
-  
-  # Predict on TESTING set
-  testing$predVol <- predict(model, testing) 
-  
-  # Calculate error and add to dataframe
-  bar <- postResample(testing$predVol, testing$Volume)
-  bar <- data.frame(as.list(bar))
-  bar$model <- model_name
-  bar$set <- '2-test'
-  trainTest <- rbind(trainTest, bar)
+  # FOR PLOTTING TEST/TRAIN summary errors
+  # foo <- model$results[c('RMSE', 'Rsquared', 'MAE')]
+  # foo$model <- model_name
+  # foo$set <- '1-train'
+  # 
+  # trainTest <- rbind(trainTest, foo)
+  # 
+  # # Predict on TESTING set
+  # testing$predVol <- predict(model, testing) 
+  # 
+  # # Calculate error and add to dataframe
+  # bar <- postResample(testing$predVol, testing$Volume)
+  # bar <- data.frame(as.list(bar))
+  # bar$model <- model_name
+  # bar$set <- '2-test'
+  # trainTest <- rbind(trainTest, bar)
 
 }
 
-results <- resamples(list(lm=allModels$lm, 
-                          #svmLinear = allModels$svmLinear,
-                          svmRadial = allModels$svmRadial,
-                          gbm = allModels$gbm,
-                          rf = allModels$rf))
-                          # gbt =allModels$xgbTree))
+err.summary
+allModels$knn
+# 'svmRadial', 'rf', 'gbm', 'xgbTree', 'knn'
+
+saveRDS(allModels, 'models/100train.mds') 
+allModels <- readRDS('models/100train.mds')
+
+# Resamples takes 20 random samples to show you the range of error
+# It kind of makes sense to do this on the whole data set
+results <- resamples(list(rf=allModels$rf,
+                          gbt = allModels$xgbTree,
+                          knn = allModels$knn,
+                          svmRad = allModels$svmRadial,
+                          gbm = allModels$gbm))
 
 bwplot(results,
        scales = list(relation = 'free'),
