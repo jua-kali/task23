@@ -1,0 +1,131 @@
+install.packages(readr)
+# you need to call on it to have access to its functions
+#library("readr")
+library(readr)
+IrisDataset <- read.csv("~/Task 1/iris.csv")
+View(IrisDataset)
+getwd()
+# error detectado faltaban comillas
+#IrisDataset <- read.csv("iris.csv")
+attributes(IrisDataset)
+# summary shows you the data. You can look for NA data.
+summary(IrisDataset)
+# display the structure of your data set
+str(IrisDataset)
+# per anul.lar una columna
+IrisDataset$X1 <- NULL
+names(IrisDataset)
+View(IrisDataset)
+colnames(IrisDataset) <- c("Sepal_Length","Sepal_Width","Petal_Length",
+                           "Petal_Width","Species")
+hist(IrisDataset$Sepal_Length)
+hist(IrisDataset$Sepal_Width)
+hist(IrisDataset$Petal_Length)
+hist(IrisDataset$Petal_Width,
+     xlab = "Petal Width",
+     main = "Histogram of Petal Width")
+# error detectado falta cerrar parentesis
+plot(IrisDataset$Sepal_Length)
+# R Colour Chart
+plot(IrisDataset$Sepal_Length,IrisDataset$Sepal_Width, col = "red")
+
+plot(IrisDataset$Petal_Length,IrisDataset$Petal_Width, col = "red",
+     abline(LinearModel.1, lty = "dashed"),
+     xlab = "Petal Length",
+     ylab = "Petal width",
+     main = "Histogram of Petal Width")
+     
+plot(IrisDataset$Petal.Length, type = "l", col = "red",
+     abline(LinearModel.1, lty = "dashed"))
+# qqnorm way to see if your data is normally distributed
+qqnorm(IrisDataset$Sepal.Length)
+qqnorm(IrisDataset$Sepal.Width)
+qqnorm(IrisDataset$Petal.Length)
+qqnorm(IrisDataset$Petal.Width)
+
+pairs(IrisDataset)
+pairs(IrisDataset, col = iris$Species)
+
+# tamany dels punts = cex
+plot(IrisDataset$Sepal.Length, IrisDataset$Petal.Length,
+     col = iris$Species,
+     pch = 16,
+     cex = 1,
+     abline(LinearModel.1, lty = "dashed"))
+
+# density graph
+library(ggplot2)
+ggplot(IrisDataset, aes(x = Petal.Length)) + 
+  geom_density(aes(color = Species)) + 
+     xlab("Petal Length") +
+     ylab("Density")
+
+
+p1 <- ggplot(IrisDataset, aes(Species, Petal_Length, fill=Species)) + 
+  geom_boxplot()+
+  scale_y_continuous("Petal Length (cm)", breaks= seq(0,30, by=.5))+
+  labs(title = "Iris Petal Length Box Plot", x = "Species")
+
+
+q <- ggplot(IrisDataset, aes(x = Petal_Width, y = Petal_Length, col = Species))
+q <- q + geom_jitter(alpha = 0.4, size = 1) + facet_grid(. ~ Species) + 
+  stat_smooth(method = 'lm', se = F) +
+  xlab("Petal Width") +
+  ylab("Petal Length")
+
+
+# IrisDataset$Species<- as.numeric(IrisDataset$Species) 
+#### No lo cambio porque me interesa que sea siendo un factor ####
+
+
+# test 1. seed 123
+set.seed(123)
+# error detectado, cambiado a 0,7 
+trainSize <- round(nrow(IrisDataset) * 0.7)
+testSize <- nrow(IrisDataset)-trainSize
+trainSize
+testSize
+training_indices<-sample(seq_len(nrow(IrisDataset)),size =trainSize)
+# espacio adicional en la parte final del codigo
+trainSet <- IrisDataset[training_indices,]
+#### porque una coma en al final del codigo ####
+testSet <- IrisDataset[-training_indices,]
+# LinearModel.1<- lm(trainSet$Petal.Width ~ trainSet$Petal.Length)
+# error no se usa el testingset para la prediccion
+LinearModel1<- lm(Petal_Length ~ Petal_Width, trainSet)
+summary(LinearModel1)
+
+
+# prueba de modelo 2 (seed 405)
+
+set.seed(405)
+trainSize <- round(nrow(IrisDataset) * 0.7)
+testSize <- nrow(IrisDataset)-trainSize
+trainSize
+testSize
+training_indices<-sample(seq_len(nrow(IrisDataset)),size =trainSize)
+trainSet <- IrisDataset[training_indices,]
+testSet <- IrisDataset[-training_indices,]
+LinearModel.2<- lm(Petal.Width ~ Petal.Length, trainSet)
+summary(LinearModel.2)
+
+# no seed
+
+trainSize <- round(nrow(IrisDataset) * 0.7)
+testSize <- nrow(IrisDataset)-trainSize
+trainSize
+testSize
+training_indices<-sample(seq_len(nrow(IrisDataset)),size =trainSize)
+trainSet <- IrisDataset[training_indices,]
+testSet <- IrisDataset[-training_indices,]
+LinearModel.3<- lm(Petal.Width ~ Petal.Length, trainSet)
+summary(LinearModel.3)
+
+# predtiction model seed 123
+prediction.1<-predict(LinearModel.1,testSet)
+prediction.1
+
+# predicion model seed 405
+prediction.2<-predict(LinearModel.2,testSet)
+prediction.2
+

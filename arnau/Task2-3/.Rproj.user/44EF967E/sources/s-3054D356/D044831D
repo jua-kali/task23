@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1544708582018.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4133880577",
+    "id" : "D044831D",
+    "lastKnownWriteTime" : 1544707712,
+    "last_content_update" : 1544707712,
+    "path" : "~/Task 2/Projecte Task 2.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "311,0",
+        "scrollLine" : "301"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

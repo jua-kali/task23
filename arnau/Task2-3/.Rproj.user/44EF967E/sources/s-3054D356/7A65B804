@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1545071851637.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "7A65B804",
+    "lastKnownWriteTime" : 7954880231060414508,
+    "last_content_update" : 1545071851637,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "17CBB7CD",
+        "caption" : "Matriu",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Matriu&cache_key=17CBB7CD",
+        "displayedObservations" : 16,
+        "environment" : "",
+        "object" : "Matriu",
+        "preview" : 0,
+        "totalObservations" : 16,
+        "variables" : 9
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
