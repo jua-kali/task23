@@ -89,14 +89,23 @@ sum.old <- aggregate(current$profit,  #Value to be summed
 # Add current profit to summary data frame
 summary$existing <- sum.old$x
 
+# Control the order of the plot
+plot.order <- c('PC', 'Laptop', 'Netbook', 'Smartphone',
+                'GameConsole', 'Tablet',
+                'Printer',  
+                'Display', 'ExtendedWarranty', 'Software',
+                'Accessories', 'PrinterSupplies')
+summary$ProductType <- as.character(summary$ProductType)
+# # Change it back to a factor to control plotting order
+summary$ProductType <- factor(summary$ProductType, levels = plot.order)
 
 
-#### Try the method where it's all the same data frame ####
+
+#### Everything in condensed dataframe, plot a different trace each column####
 
 # This method comes from: https://plot.ly/r/graphing-multiple-chart-types/
-# Adding traces can also be done by a loop,
-# But I left it unlooped for troubleshooting purposes while I was
-# figuring out traces
+# Adding traces can also be done by a loop, but I left it unlooped for 
+# troubleshooting purposes while I was figuring out traces
 p <- plot_ly(summary) %>%
 
   add_trace(x = ~ProductType,

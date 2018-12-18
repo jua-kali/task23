@@ -2,6 +2,11 @@
 
 PC, Laptops, Netbooks and Smartphones
 
+'GameConsole', 'Tablet',
+'Printer',  
+'Display', 'ExtendedWarranty', 'Software',
+'Accessories', 'PrinterSupplies'
+
 knn
 rf
 svmRadial
