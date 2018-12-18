@@ -2,6 +2,11 @@
 
 PC, Laptops, Netbooks and Smartphones
 
+knn
+rf
+svmRadial
+xgbTree
+
 
 =Query({'Cash - EUR'!A2:D;'Card - USD'!A3:D}, "select * where Col1 is not null and Col3 != 'atm' and Col3 != 'ach'", 0)
 

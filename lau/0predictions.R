@@ -36,7 +36,7 @@ dfsimp <- df.new[c('ProductNum',
 allModels80 <- readRDS('models/80train.mds')
 
 
-# Generate prediction for all models
+#### Predict Profits For New Products for all Models ####
 dfPred <- data.frame()
 
 # Start counter for model names...there's probably a more elegant way to do this
@@ -69,21 +69,8 @@ summary.melt$ProductType <- as.character(summary.melt$ProductType)
 # # Change it back to a factor to control plotting order
 summary.melt$ProductType <- factor(summary.melt$ProductType, levels = rows)
 
-#### This plot works! ####
-p <- plot_ly(data = summary.melt,
-             type = 'scatter', 
-             marker = list(size = 14),
-             x = ~ProductType,
-             y = ~value,
-             color = ~variable) %>%
-  layout(yaxis = list(title = 'Predicted Profit'),
-         xaxis = list(title = ''))
-p
+#### Calculate current profits ####
 
-
-#### Now fiddling with bar chart ####
-
-# Sum CURRENT PROFITS in these categories to compare
 current <- df.old[c('ProductType',      
                     'Price', 
                     'x4StarReviews', 
@@ -98,6 +85,80 @@ current$profit <- current$Volume * current$ProfitMargin * current$Price
 sum.old <- aggregate(current$profit,  #Value to be summed
                      by = list(current$ProductType), #Category to sum them by
                      FUN = sum)
+
+# Add current profit to summary data frame
+summary$existing <- sum.old$x
+
+
+
+#### Try the method where it's all the same data frame ####
+
+# This method comes from: https://plot.ly/r/graphing-multiple-chart-types/
+# Adding traces can also be done by a loop,
+# But I left it unlooped for troubleshooting purposes while I was
+# figuring out traces
+p <- plot_ly(summary) %>%
+
+  add_trace(x = ~ProductType,
+            y = ~gbm,
+            type = 'scatter',
+            mode = 'markers',
+            name = 'gbm',
+            marker = list(size = 10)
+            )  %>%
+  add_trace(x = ~ProductType,
+            y = ~knn,
+            type = 'scatter',
+            mode = 'markers',
+            name = 'knn',
+            marker = list(size = 10)
+            ) %>%
+  add_trace(x = ~ProductType,
+            y = ~rf,
+            type = 'scatter',
+            mode = 'markers',
+            name = 'rf',
+            marker = list(size = 10)
+            ) %>%
+  add_trace(x = ~ProductType,
+            y = ~svmRadial,
+            type = 'scatter',
+            mode = 'markers',
+            name = 'svmRad',
+            marker = list(size = 10)
+            ) %>%
+  add_trace(x = ~ProductType,
+            y = ~xgbTree,
+            type = 'scatter',
+            mode = 'markers',
+            name = 'xgbTree',
+            marker = list(size = 10)
+            ) %>%
+  add_trace(x = ~ProductType,
+            y = ~existing,
+            type = 'bar',
+            name = 'existing products',
+            marker = list(color = '#C9EFF9')
+  ) %>%
+  layout(yaxis = list(title = 'Predicted Profit'),
+         xaxis = list(title = '')
+         )
+p
+
+
+all.products <- as.vector(summary$ProductType)
+
+p <- add_trace(data = rep(100000, 11),
+               type = 'bar',
+               x = all.products)
+
+p
+
+
+
+#### Now fiddling with bar chart ####
+
+
 
 #Basic bar graph of current profit
 q <- plot_ly(data = sum.old,
@@ -157,8 +218,7 @@ p
 
 
 
-# Add current profit to summary data frame
-# summary$existing <- sum.old$x
+
 
 
 # Filter to interesting products only
