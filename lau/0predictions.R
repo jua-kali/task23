@@ -28,8 +28,7 @@ dfsimp <- df.new[c('ProductNum',
                        'Price', 
                        'x4StarReviews', 
                        'PositiveServiceReview',
-                       'ProfitMargin',
-                       'Price'
+                       'ProfitMargin'
                        )]
   
   
@@ -57,12 +56,78 @@ for (model in allModels80) {
 dfPred$profit[dfPred$profit < 0 ] <- 0
 
 summary<- dcast(dfPred,                # Dataframe 
-                        ProductType ~ model,   # Rows ~ Columns (can have layers with +)
-                        value.var = "profit",  # Table values
-                        fun.aggregate = sum)   # Sum the values in the table
+                ProductType ~ model,   # Rows ~ Columns (can have layers with +)
+                value.var = "profit",  # Table values
+                fun.aggregate = sum)   # Sum the values in the table
+
+
+# Sum CURRENT PROFITS in these categories to compare
+current <- df.old[c('ProductType',      
+                    'Price', 
+                    'x4StarReviews', 
+                    'PositiveServiceReview',
+                    'ProfitMargin',
+                    'Volume'
+)]
+
+current$profit <- current$Volume * current$ProfitMargin * current$Price
+
+# Sum profit by category
+sum.old <- aggregate(current$profit,  #Value to be summed
+                     by = list(current$ProductType), #Category to sum them by
+                     FUN = sum)
+
+# Add current profit to summary data frame
+# summary$existing <- sum.old$x
+
 
 # Filter to interesting products only
-rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone')
+rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone', 
+          'Tablet', 'GameConsole')
 summary <- summary[summary$ProductType %in% rows, ]
 
+# Change data shape for plotting
+summary <- melt(summary)
+summary$ProductType <- as.character(summary$ProductType)
+# Change it back to a factor to control plotting order
+summary$ProductType <- factor(summary$ProductType, levels = rows)
+
 # 
+
+p <- plot_ly(data = sum.old,
+             type = 'bar',
+             x = ~ Group.1,
+             y = ~ x,
+             color = c('yellow')) %>%
+  add_trace(data = summary,
+            type = 'scatter', 
+            mode = 'markers', 
+            marker = list(size = 14),
+            x = ~ProductType,
+            y = ~value,
+            color = ~variable) %>%
+  layout(yaxis = list(title = 'Predicted Profit'),
+         xaxis = list(title = ''))
+p
+
+p <- plot_ly(data = summary,
+             type = 'scatter', 
+             marker = list(size = 14),
+             x = ~ProductType,
+             y = ~value,
+             color = ~variable) %>%
+  add_trace(data = sum.old,
+            type = 'bar',
+            x = ~ Group.1,
+            y = ~ x,
+            color = c('yellow')) %>%
+  layout(yaxis = list(title = 'Predicted Profit'),
+         xaxis = list(title = ''))
+p
+
+
+
+# Filter to interesting products only
+rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone', 
+          'Tablet', 'GameConsole')
+summary <- summary[summary$ProductType %in% rows, ]
