@@ -7,6 +7,8 @@
 
 library(caret)
 library(plotly)
+library(reshape2)
+
 set.seed(46)
 
 #### SET THESE PARAMETERS ####
@@ -98,7 +100,7 @@ for (model_name in models) {
 }
 
 err.summary
-allModels$knn
+
 # 'svmRadial', 'rf', 'gbm', 'xgbTree', 'knn'
 
 saveRDS(allModels, 'models/80train.mds') 
@@ -131,6 +133,7 @@ dfsimp <- subset(df.old,
                                'Volume'
                                ))
 
+
 dfPred <- data.frame()
 
 # Start counter for model names...there's probably a more elegant way to do this
@@ -140,14 +143,29 @@ for (model in allModels80) {
   dftemp <- dfsimp
   dftemp$model <- names(allModels80)[i]
   dftemp$VolPred <- predict(model, dftemp)
+  dftemp$profit <- dftemp$VolPred * dftemp$ProfitMargin
   
   dfPred <- rbind(dfPred, dftemp)
   i <- i + 1
 }
 
-dfPred$residual <- dfPred$Volume - dfPred$VolPred
+dfPred$residual <- dfPred$VolPred - dfPred$Volume
 
+productSummary <- dcast(dfPred, ProductType ~ model, 
+                        value.var = "profit",
+                        fun.aggregate = sum)
+
+
+## Full plot
 p <- plot_ly(data = dfPred,
+             x = ~Volume,
+             y = ~residual,
+             color = ~model)
+p
+
+dfRFxgb <- subset(dfPred, subset = (model == 'rf' | model == 'xgbTree'))
+
+p <- plot_ly(data = dfRFxgb,
              x = ~Volume,
              y = ~residual,
              color = ~model)
