@@ -2,7 +2,7 @@
 
 PC, Laptops, Netbooks and Smartphones
 
-'GameConsole', 'Tablet',
+k'GameConsole', 'Tablet',
 'Printer',  
 'Display', 'ExtendedWarranty', 'Software',
 'Accessories', 'PrinterSupplies'

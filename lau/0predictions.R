@@ -89,10 +89,11 @@ sum.old <- aggregate(current$profit,  #Value to be summed
 # Add current profit to summary data frame
 summary$existing <- sum.old$x
 
+
 # Control the order of the plot
-plot.order <- c('PC', 'Laptop', 'Netbook', 'Smartphone',
-                'GameConsole', 'Tablet',
-                'Printer',  
+plot.order <- c('Tablet','GameConsole', 
+                'PC', 'Laptop', 'Netbook', 
+                'Smartphone', 'Printer',  
                 'Display', 'ExtendedWarranty', 'Software',
                 'Accessories', 'PrinterSupplies')
 summary$ProductType <- as.character(summary$ProductType)
@@ -100,47 +101,60 @@ summary$ProductType <- as.character(summary$ProductType)
 summary$ProductType <- factor(summary$ProductType, levels = plot.order)
 
 
+# Create a data frame where present and future profit is summed
+sumHigh <- summary
+sumHigh$gbm <- summary$gbm + summary$existing
+sumHigh$knn <- summary$knn + summary$existing
+sumHigh$rf <- summary$rf + summary$existing
+sumHigh$svmRadial <- summary$svmRadial + summary$existing
+sumHigh$xgbTree <- summary$xgbTree + summary$existing
 
-#### Everything in condensed dataframe, plot a different trace each column####
+
+
+#### Plot everything in condensed dataframe, a different trace each column####
 
 # This method comes from: https://plot.ly/r/graphing-multiple-chart-types/
 # Adding traces can also be done by a loop, but I left it unlooped for 
 # troubleshooting purposes while I was figuring out traces
-p <- plot_ly(summary) %>%
+
+# CHOOSE summary or sumHigh
+# summary has all points starting at zero
+# sumHigh adds them together for the total height
+p <- plot_ly(sumHigh) %>%
 
   add_trace(x = ~ProductType,
             y = ~gbm,
             type = 'scatter',
             mode = 'markers',
-            name = 'gbm',
+            name = 'gbm prediction',
             marker = list(size = 10)
             )  %>%
   add_trace(x = ~ProductType,
             y = ~knn,
             type = 'scatter',
             mode = 'markers',
-            name = 'knn',
+            name = 'knn prediction',
             marker = list(size = 10)
             ) %>%
   add_trace(x = ~ProductType,
             y = ~rf,
             type = 'scatter',
             mode = 'markers',
-            name = 'rf',
+            name = 'rf prediction',
             marker = list(size = 10)
             ) %>%
   add_trace(x = ~ProductType,
             y = ~svmRadial,
             type = 'scatter',
             mode = 'markers',
-            name = 'svmRad',
+            name = 'svmRad prediction',
             marker = list(size = 10)
             ) %>%
   add_trace(x = ~ProductType,
             y = ~xgbTree,
             type = 'scatter',
             mode = 'markers',
-            name = 'xgbTree',
+            name = 'xgbTree prediction',
             marker = list(size = 10)
             ) %>%
   add_trace(x = ~ProductType,
@@ -148,95 +162,16 @@ p <- plot_ly(summary) %>%
             type = 'bar',
             name = 'existing products',
             marker = list(color = '#C9EFF9')
-  ) %>%
-  layout(yaxis = list(title = 'Predicted Profit'),
+            ) %>%
+  layout(title = 'Total Profit (Existing + New) by Product Type',
+         yaxis = list(title = 'Current + Predicted Profit'),
          xaxis = list(title = '')
          )
 p
 
 
-all.products <- as.vector(summary$ProductType)
-
-p <- add_trace(data = rep(100000, 11),
-               type = 'bar',
-               x = all.products)
-
-p
-
-
-
-#### Now fiddling with bar chart ####
-
-
-
-#Basic bar graph of current profit
-q <- plot_ly(data = sum.old,
-             type = 'bar',
-             x = ~ Group.1,
-             y = ~ x,
-             color = c('yellow')
-)
-
-q
-
-
-
-q <- plot_ly(data = summary$model,
-               type = 'scatter', 
-               mode = 'markers', 
-               marker = list(size = 14),
-               x = ~ProductType
-               #y = ~value,
-               #color = ~variable
-)
-
-
-for (model in colnames(summary)[2:6]){
-  p <- add_trace(data = summary$model,
-                   type = 'scatter', 
-                   mode = 'markers', 
-                   marker = list(size = 14),
-                   x = ~ProductType
-                   #y = ~value,
-                   #color = ~variable
-                   )
-}
-
-p
-
-
-p <- plot_ly(data = sum.old,
-             type = 'bar',
-             x = ~ Group.1,
-             y = ~ x,
-             color = c('yellow')) %>%
-  add_trace(data = summary,
-            type = 'scatter', 
-            mode = 'markers', 
-            marker = list(size = 14),
-            x = ~ProductType,
-            y = ~value,
-            color = ~variable) %>%
-  layout(yaxis = list(title = 'Predicted Profit'),
-         xaxis = list(title = ''))
-p
 
 
 
 
 
-
-
-
-
-
-# Filter to interesting products only
-# rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone', 
-#           'Tablet', 'GameConsole')
-# summary <- summary[summary$ProductType %in% rows, ]
-
-
-# Filter to interesting products only
-rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone', 
-          'Tablet', 'GameConsole')
-summary <- summary[summary$ProductType %in% rows, ]
