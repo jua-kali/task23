@@ -28,7 +28,8 @@ dfsimp <- df.new[c('ProductNum',
                        'Price', 
                        'x4StarReviews', 
                        'PositiveServiceReview',
-                       'ProfitMargin'
+                       'ProfitMargin',
+                       'Price'
                        )]
   
   
@@ -46,8 +47,22 @@ for (model in allModels80) {
   dftemp <- dfsimp
   dftemp$model <- names(allModels80)[i]
   dftemp$VolPred <- predict(model, dftemp)
-  dftemp$profit <- dftemp$VolPred * dftemp$ProfitMargin
+  dftemp$profit <- dftemp$VolPred * dftemp$ProfitMargin * dftemp$Price
   
   dfPred <- rbind(dfPred, dftemp)
   i <- i + 1
 }
+
+# If negative profit is predicted, change it to zero
+dfPred$profit[dfPred$profit < 0 ] <- 0
+
+summary<- dcast(dfPred,                # Dataframe 
+                        ProductType ~ model,   # Rows ~ Columns (can have layers with +)
+                        value.var = "profit",  # Table values
+                        fun.aggregate = sum)   # Sum the values in the table
+
+# Filter to interesting products only
+rows <- c('PC', 'Laptop', 'Netbook', 'Smartphone')
+summary <- summary[summary$ProductType %in% rows, ]
+
+# 

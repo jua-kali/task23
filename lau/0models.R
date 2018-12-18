@@ -151,9 +151,11 @@ for (model in allModels80) {
 
 dfPred$residual <- dfPred$VolPred - dfPred$Volume
 
-productSummary <- dcast(dfPred, ProductType ~ model, 
-                        value.var = "profit",
-                        fun.aggregate = sum)
+# Make a pivot table of products, profits
+productSummary <- dcast(dfPred,                # Dataframe 
+                        ProductType ~ model,   # Rows ~ Columns (can have layers with +)
+                        value.var = "profit",  # Table values
+                        fun.aggregate = sum)   # Sum the values in the table
 
 
 ## Full plot
